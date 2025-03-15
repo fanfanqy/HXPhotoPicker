@@ -132,6 +132,7 @@ open class CameraViewController: HXBaseViewController, CameraViewControllerProto
         
         bottomView = CameraBottomView(
             tintColor: config.tintColor,
+            storkColor: config.storkColor,
             takePhotoMode: config.takePhotoMode
         )
         bottomView.delegate = self

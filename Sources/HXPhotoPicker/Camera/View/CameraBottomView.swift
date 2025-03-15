@@ -24,7 +24,7 @@ class CameraBottomView: UIView {
     private var backButton: UIButton!
     private var maskLayer: CAGradientLayer!
     private var takeMaskLayer: CAShapeLayer!
-    private var takeBgView: UIVisualEffectView!
+    private var takeBgView: UIView!
     private var takeView: UIView!
     private var tapGesture: UITapGestureRecognizer!
     private var longPress: UILongPressGestureRecognizer!
@@ -43,16 +43,19 @@ class CameraBottomView: UIView {
     var isTaking: Bool = false
     var isRecording: Bool = false
     var longPressBeganPoint: CGPoint = .zero
-    let color: UIColor
+    var color: UIColor
+    var storkColor: UIColor
     let takePhotoMode: CameraConfiguration.TakePhotoMode
     var captureType: CameraController.CaptureType?
     var takeType: CameraBottomViewTakeType = .photo
     
     init(
         tintColor: UIColor,
+        storkColor: UIColor,
         takePhotoMode: CameraConfiguration.TakePhotoMode
     ) {
         self.color = tintColor
+        self.storkColor = storkColor
         self.takePhotoMode = takePhotoMode
         super.init(frame: .zero)
         initViews()
@@ -75,15 +78,39 @@ class CameraBottomView: UIView {
         takeMaskLayer.contentsScale = UIScreen._scale
         takeMaskLayer.fillColor = UIColor.clear.cgColor
         takeMaskLayer.lineWidth = 5
-        takeMaskLayer.strokeColor = color.cgColor
+        takeMaskLayer.lineCap = .round
+        takeMaskLayer.lineJoin = .round
+        takeMaskLayer.strokeColor = storkColor.cgColor
         takeMaskLayer.isHidden = true
         
-        takeBgView = UIVisualEffectView(effect: UIBlurEffect(style: .extraLight))
+        takeBgView = UIView()
         takeBgView.size = CGSize(width: 80, height: 80)
         takeBgView.layer.cornerRadius = takeBgView.width * 0.5
         takeBgView.layer.masksToBounds = true
-        takeBgView.layer.addSublayer(takeMaskLayer)
         addSubview(takeBgView)
+        
+        // 创建一个 CAShapeLayer
+        let shapeLayer = CAShapeLayer()
+        
+        // 设置圆形的宽高
+        let size: CGFloat = 80
+        let lineWidth: CGFloat = 8
+        
+        // 创建一个矩形路径
+        let path = UIBezierPath(ovalIn: CGRect(x: 0, y: 0, width: size, height: size))
+        // 设置路径
+        shapeLayer.path = path.cgPath
+        // 设置线条颜色和宽度
+        shapeLayer.strokeColor = UIColor.white.cgColor
+        shapeLayer.fillColor = UIColor.clear.cgColor
+        shapeLayer.lineWidth = lineWidth
+        // 设置圆形的位置
+        shapeLayer.frame = CGRect(x: 0, y: 0, width: size, height: size)
+        takeBgView.layer.addSublayer(shapeLayer)
+        
+        
+        takeBgView.layer.addSublayer(takeMaskLayer)
+        
         
         takeView = UIView()
         takeView.size = CGSize(width: 60, height: 60)
@@ -234,6 +261,9 @@ class CameraBottomView: UIView {
         backButton.x = width * 0.5 - 120
         backButton.centerY = height * 0.5
         takeBgView.center = CGPoint(x: width * 0.5, y: height * 0.5)
+      
+        
+        
         takeView.center = CGPoint(x: width * 0.5, y: height * 0.5)
         tipLb.frame = CGRect(
             x: UIDevice.leftMargin + 15,
@@ -357,7 +387,7 @@ extension CameraBottomView {
                 isTaking = true
                 backButton.isUserInteractionEnabled = false
                 UIView.animate(withDuration: 0.15) {
-                    self.takeView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+                    self.takeView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                 } completion: { _ in
                     self.delegate?.bottomView(beganTakePictures: self)
                     UIView.animate(withDuration: 0.15) {
@@ -381,7 +411,7 @@ extension CameraBottomView {
                 delegate?.bottomView(longPressDidBegan: self)
                 UIView.animate(withDuration: 0.25) {
                     self.takeView.backgroundColor = self.color
-                    self.takeView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+                    self.takeView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
                 } completion: { _ in
                     if self.isRecording {
                         self.delegate?.bottomView(beganRecording: self)
@@ -397,7 +427,7 @@ extension CameraBottomView {
         isTaking = true
         backButton.isUserInteractionEnabled = false
         UIView.animate(withDuration: 0.15) {
-            self.takeView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+            self.takeView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
         } completion: { _ in
             self.delegate?.bottomView(beganTakePictures: self)
             UIView.animate(withDuration: 0.15) {
@@ -423,8 +453,8 @@ extension CameraBottomView {
             backButton.isUserInteractionEnabled = false
             delegate?.bottomView(longPressDidBegan: self)
             UIView.animate(withDuration: 0.25) {
-                self.takeBgView.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
-                self.takeView.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+                self.takeBgView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+                self.takeView.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             } completion: { _ in
                 if self.isRecording {
                     self.delegate?.bottomView(beganRecording: self)
